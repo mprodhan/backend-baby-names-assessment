@@ -10,6 +10,8 @@
 # Google's Python Class
 # http://code.google.com/edu/languages/google-python-class/
 
+__author__= "mprodhan/madarp"
+
 import sys
 import re
 import argparse
@@ -46,7 +48,28 @@ def extract_names(filename):
     ['2006', 'Aaliyah 91', Aaron 57', 'Abagail 895', ' ...]
     """
     names = []
-    # +++your code here+++
+    with open(filename, "r") as f:
+        text_read = f.read()
+    match_year = re.search(r'Popularity\sin\s(\d+)', text_read)
+    if not match_year:
+        sys.stderr.write("Couldn't find the year!\n")
+        sys.exit(1)
+    year = match_year.group(1)
+    names.append(year)
+
+    tuples = re.findall(r'<td>(\d+)</td><td>(\w+)</td>\<td>(\w+)</td>', text_read)
+
+    names_and_rank = {}
+    for rank, mname, fname in tuples:
+        if mname not in names_and_rank:
+            rank = names_and_rank[mname]
+        if fname not in names_and_rank:
+            rank = names_and_rank[fname]
+
+    orderly_names = sorted(names_and_rank.keys())
+    for name in orderly_names:
+        names.append(name + " " + names_and_rank[name])
+
     return names
 
 
@@ -81,7 +104,15 @@ def main(args):
     # Use the create_summary flag to decide whether to print the list,
     # or to write the list to a summary file e.g. `baby1990.html.summary`
 
-    # +++your code here+++
+    for filename in file_list:
+        print("filename found: {}".format(filename))
+        names = extract_names(filename)
+    text = '\n'.join(names)
+    if create_summary:
+        with open(filename + '.summary', 'w') as outf:
+            text_name = outf.write(text + '\n')
+    else:
+        print(text)
 
 
 if __name__ == '__main__':
